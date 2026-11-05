@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<title>Cyber Crime Speaking Quest · 網絡罪行說話大冒險</title>
+<style>
+  :root{
+    --ink:#000;
+    --paper:#fff;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,
+                "PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif;
+    font-size:17px;
+    line-height:1.55;
+    -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:840px;margin:0 auto;padding:24px 18px 64px;}
+
+  /* ---------- header ---------- */
+  .site-header{border-bottom:4px solid var(--ink);padding-bottom:14px;margin-bottom:24px;}
+  .site-header h1{
+    font-size:clamp(1.35rem,4.2vw,1.9rem);
+    margin:0 0 6px;letter-spacing:.02em;text-transform:uppercase;line-height:1.15;
+  }
+  .site-header p{margin:0;font-size:.88rem;}
+
+  /* ---------- screens ---------- */
+  .screen{display:none;}
+  .screen.active{display:block;}
+
+  /* ---------- cards ---------- */
+  .card{border:2px solid var(--ink);padding:18px;margin-bottom:18px;background:var(--paper);}
+  .card h3{
+    margin:0 0 12px;font-size:.95rem;text-transform:uppercase;letter-spacing:.08em;
+    border-bottom:2px solid var(--ink);padding-bottom:8px;
+  }
+  .card h2{margin:0 0 10px;font-size:1.1rem;text-transform:uppercase;letter-spacing:.06em;}
+  .card ol,.card ul{margin:0;padding-left:22px;}
+  .card ol li,.card ul li{margin-bottom:8px;}
+  .hint{font-size:.85rem;margin:12px 0 0;border-top:1px dashed var(--ink);padding-top:12px;}
+  .small{font-size:.78rem;font-weight:400;}
+
+  /* ---------- buttons ---------- */
+  .btn{
+    display:inline-block;font:inherit;font-weight:700;
+    padding:12px 20px;border:2px solid var(--ink);
+    background:var(--paper);color:var(--ink);
+    cursor:pointer;letter-spacing:.02em;
+    transition:background .15s,color .15s;
+    border-radius:0;
+  }
+  .btn:hover,.btn:focus-visible{background:var(--ink);color:var(--paper);outline:none;}
+  .btn.primary{background:var(--ink);color:var(--paper);}
+  .btn.primary:hover,.btn.primary:focus-visible{background:var(--paper);color:var(--ink);}
+  .btn[hidden]{display:none !important;}
+  .btn.small-btn{padding:8px 14px;font-size:.85rem;}
+
+  .level-buttons{display:grid;gap:12px;margin-bottom:16px;}
+  .level-btn{
+    display:flex;flex-direction:column;align-items:flex-start;gap:2px;
+    width:100%;text-align:left;
+  }
+  .level-btn .lvl-en{font-size:1rem;}
+  .level-btn .lvl-zh{font-size:.85rem;font-weight:400;}
+
+  .checkline{
+    display:flex;align-items:center;gap:10px;
+    border-top:1px dashed var(--ink);padding-top:14px;
+    font-size:.9rem;cursor:pointer;
+  }
+  .checkline input{width:20px;height:20px;accent-color:#000;cursor:pointer;}
+
+  /* ---------- top bar ---------- */
+  .topbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;align-items:center;}
+  .tag{
+    border:2px solid var(--ink);padding:4px 10px;
+    font-size:.76rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  }
+  .tag.spacer{margin-left:auto;}
+
+  /* ---------- question ---------- */
+  .q-zh{font-size:1rem;margin:0 0 6px;}
+  .q-en{font-size:clamp(1.2rem,3.6vw,1.55rem);margin:0 0 14px;line-height:1.3;}
+  .q-time{margin:0;font-size:.9rem;border-top:1px dashed var(--ink);padding-top:10px;}
+
+  /* ---------- timer ---------- */
+  .timer-track{height:16px;border:2px solid var(--ink);background:var(--paper);margin-bottom:14px;overflow:hidden;}
+  .timer-fill{height:100%;width:100%;background:var(--ink);transition:width .1s linear;}
+  .timer-fill.warn{background:repeating-linear-gradient(45deg,#000 0 8px,#fff 8px 16px);}
+  .timer-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .timer-num{
+    font-size:1.55rem;font-weight:800;font-variant-numeric:tabular-nums;
+    min-width:70px;
+  }
+  .timer-num.warn{animation:blink .7s steps(1) infinite;}
+  @keyframes blink{50%{opacity:0;}}
+
+  /* ---------- answer ---------- */
+  .answer-en{font-size:1.02rem;margin:0 0 12px;}
+  .answer-zh{
+    font-size:.95rem;margin:14px 0 0;
+    border-top:1px dashed var(--ink);padding-top:12px;
+  }
+  #words-list{list-style:none;margin:0;padding:0;}
+  #words-list li{
+    display:flex;justify-content:space-between;gap:14px;
+    padding:8px 0;border-bottom:1px dashed var(--ink);
+  }
+  #words-list li:last-child{border-bottom:none;}
+  #words-list .w-en{font-weight:700;}
+  #words-list .w-zh{text-align:right;}
+
+  /* ---------- stars ---------- */
+  .stars{display:flex;gap:10px;margin-bottom:10px;}
+  .star-btn{
+    font-size:1.9rem;line-height:1;padding:0;
+    width:56px;height:56px;
+    background:var(--paper);color:var(--ink);
+    border:2px solid var(--ink);cursor:pointer;
+    transition:background .15s,color .15s;
+    border-radius:0;
+  }
+  .star-btn:hover,.star-btn:focus-visible{background:var(--ink);color:var(--paper);outline:none;}
+  .star-btn.on{background:var(--ink);color:var(--paper);}
+
+  /* ---------- end screen ---------- */
+  .grand-total{
+    border:2px solid var(--ink);padding:16px;text-align:center;
+    font-size:1.9rem;font-weight:800;margin-bottom:18px;
+  }
+  .end-message{font-size:1rem;margin:0 0 18px;border-left:6px solid var(--ink);padding-left:14px;}
+  table{width:100%;border-collapse:collapse;margin-bottom:18px;}
+  th,td{border:2px solid var(--ink);padding:8px 6px;text-align:center;font-size:.9rem;}
+  th{background:var(--ink);color:var(--paper);font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;}
+  td:first-child{text-align:left;font-weight:700;font-size:.82rem;}
+  .end-buttons{display:flex;flex-wrap:wrap;gap:12px;}
+
+  /* ---------- footer ---------- */
+  .site-footer{
+    margin-top:34px;border-top:2px solid var(--ink);padding-top:14px;
+    font-size:.78rem;text-align:center;
+  }
+
+  @media (max-width:420px){
+    body{font-size:16px;}
+    .star-btn{width:48px;height:48px;font-size:1.6rem;}
+    td,th{padding:6px 3px;font-size:.78rem;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="site-header">
+    <h1>Cyber Crime Speaking Quest</h1>
+    <p>網絡罪行說話大冒險 · DSE Paper 4 Group Discussion Practice</p>
+  </header>
+
+  <main>
+
+    <!-- ================= START SCREEN ================= -->
+    <section id="screen-start" class="screen active">
+
+      <div class="card">
+        <h2>How to play 玩法</h2>
+        <ol>
+          <li>Read the question. 閱讀問題。</li>
+          <li>Click <strong>Start Timer</strong> and speak your answer. 按「開始計時」然後說出答案。</li>
+          <li>Click <strong>Show Answer</strong> and compare. 按「顯示答案」對照一下。</li>
+          <li>Give yourself 1–3 stars. 給自己 1–3 粒星。</li>
+        </ol>
+        <p class="hint">
+          Remember the pattern: <strong>Idea → because → for example → so</strong><br>
+          記住句式：<strong>想法 → because → for example → so</strong>
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>Choose a level 選擇關卡</h3>
+        <div class="level-buttons">
+          <button class="btn level-btn" data-level="0">
+            <span class="lvl-en">Level 1 · Easy</span>
+            <span class="lvl-zh">第一關 · 簡單 · 30 seconds 秒</span>
+          </button>
+          <button class="btn level-btn" data-level="1">
+            <span class="lvl-en">Level 2 · Medium</span>
+            <span class="lvl-zh">第二關 · 中等 · 45 seconds 秒</span>
+          </button>
+          <button class="btn level-btn" data-level="2">
+            <span class="lvl-en">Level 3 · Hard</span>
+            <span class="lvl-zh">第三關 · 困難 · 60 seconds 秒</span>
+          </button>
+        </div>
+        <label class="checkline">
+          <input type="checkbox" id="extra-time">
+          Add 15 extra seconds 加 15 秒（適合能力較弱學生）
+        </label>
+      </div>
+
+    </section>
+
+    <!-- ================= GAME SCREEN ================= -->
+    <section id="screen-game" class="screen">
+
+      <div class="topbar">
+        <span class="tag" id="level-label">Level 1</span>
+        <span class="tag" id="q-label">Question 1 of 4</span>
+        <span class="tag spacer" id="star-label">★ 0</span>
+        <button class="btn small-btn" id="btn-menu">Menu 目錄</button>
+      </div>
+
+      <div class="card">
+        <p class="q-zh" id="q-zh">題目中譯</p>
+        <h2 class="q-en" id="q-en">Question</h2>
+        <p class="q-time">Time limit 時限: <strong id="q-time">30</strong> seconds 秒</p>
+      </div>
+
+      <div class="card">
+        <div class="timer-track"><div class="timer-fill" id="timer-fill"></div></div>
+        <div class="timer-row">
+          <span class="timer-num" id="timer-num">30s</span>
+          <button class="btn primary" id="btn-start">Start Timer 開始計時</button>
+          <button class="btn" id="btn-reveal" hidden>Show Answer 顯示答案</button>
+        </div>
+      </div>
+
+      <div id="answer-area" hidden>
+
+        <div class="card">
+          <h3>Sample Answer 參考答案</h3>
+          <p class="answer-en" id="answer-en"></p>
+          <button class="btn small-btn" id="btn-translate">顯示中文翻譯 Show Chinese</button>
+          <p class="answer-zh" id="answer-zh" hidden></p>
+        </div>
+
+        <div class="card">
+          <h3>Useful Words 有用詞彙</h3>
+          <ul id="words-list"></ul>
+        </div>
+
+        <div class="card">
+          <h3>How did you do? 你覺得自己表現如何？</h3>
+          <div class="stars">
+            <button class="star-btn" data-v="1" aria-label="1 star">☆</button>
+            <button class="star-btn" data-v="2" aria-label="2 stars">☆</button>
+            <button class="star-btn" data-v="3" aria-label="3 stars">☆</button>
+          </div>
+          <p class="small">
+            1 star ☆ = 說了幾句 &nbsp;·&nbsp; 2 stars ★★ = 完整句子 &nbsp;·&nbsp; 3 stars ★★★ = 完整句子 + 例子
+          </p>
+          <button class="btn primary" id="btn-next" hidden>Next 下一題 →</button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================= END SCREEN ================= -->
+    <section id="screen-end" class="screen">
+
+      <div class="card">
+        <h3>Your Score 你的分數</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Level 等級</th>
+              <th>Q1</th>
+              <th>Q2</th>
+              <th>Q3</th>
+              <th>Q4</th>
+              <th>Total 總分</th>
+            </tr>
+          </thead>
+          <tbody id="score-body"></tbody>
+        </table>
+        <div class="grand-total" id="grand-total">0 / 36 ★</div>
+        <p class="end-message" id="end-message"></p>
+        <div class="end-buttons">
+          <button class="btn primary" id="btn-next-level" hidden>Next Level 下一關 →</button>
+          <button class="btn" id="btn-menu-end">Menu 目錄</button>
+          <button class="btn" id="btn-again">Play Again 再玩一次</button>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    Practise the pattern: Idea → because → for example → so &nbsp;|&nbsp; 想法 → because → for example → so
+  </footer>
+
+</div>
+
+<script>
+/* =========================================================
+   DATA
+   ========================================================= */
+const LEVELS = [
+  {
+    name: 'Level 1',
+    nameZH: '第一關',
+    time: 30,
+    questions: [
+      {
+        en: 'Why do cyber crimes happen?',
+        zh: '為什麼會有網絡罪行？',
+        answer: 'I think cyber crimes happen because people use easy passwords. For example, "123456" is very easy to guess. So criminals can steal money.',
+        answerZH: '我認為網絡罪行會發生，因為人們使用簡單密碼。例如，「123456」很容易猜到。所以罪犯可以偷錢。',
+        words: [
+          { en: 'cyber crimes', zh: '網絡罪行' },
+          { en: 'easy passwords', zh: '簡單密碼' },
+          { en: 'because', zh: '因為' },
+          { en: 'for example', zh: '例如' },
+          { en: 'so', zh: '所以' }
+        ]
+      },
+      {
+        en: 'Why is it important to protect ourselves?',
+        zh: '為什麼保護自己很重要？',
+        answer: 'I think it is important because we can lose money. For example, criminals can use our bank password to buy things online. So we have financial loss.',
+        answerZH: '我認為這很重要，因為我們可能損失金錢。例如，罪犯可以用我們的銀行密碼在網上購物。所以我們會有金錢損失。',
+        words: [
+          { en: 'important', zh: '重要' },
+          { en: 'lose money', zh: '損失金錢' },
+          { en: 'bank password', zh: '銀行密碼' },
+          { en: 'buy things online', zh: '在網上購物' },
+          { en: 'financial loss', zh: '金錢損失' }
+        ]
+      },
+      {
+        en: 'What is one way to protect ourselves?',
+        zh: '其中一個保護自己的方法是什麼？',
+        answer: 'I think we should use different passwords. For example, my school password is different from my bank password. So criminals cannot get all my accounts.',
+        answerZH: '我認為我們應該使用不同的密碼。例如，我的學校密碼和銀行密碼不同。所以罪犯不能取得我所有帳戶。',
+        words: [
+          { en: 'different passwords', zh: '不同的密碼' },
+          { en: 'school password', zh: '學校密碼' },
+          { en: 'bank password', zh: '銀行密碼' },
+          { en: 'accounts', zh: '帳戶' },
+          { en: 'cannot get', zh: '不能取得' }
+        ]
+      },
+      {
+        en: 'What else is important?',
+        zh: '還有什麼重要？',
+        answer: 'I think we should teach our family and friends. For example, I can help my grandparents make a complex password. So fewer people will be victims.',
+        answerZH: '我認為我們應該教家人和朋友。例如，我可以幫祖父母設定複雜密碼。所以更少人會成為受害者。',
+        words: [
+          { en: 'teach', zh: '教' },
+          { en: 'family and friends', zh: '家人和朋友' },
+          { en: 'grandparents', zh: '祖父母' },
+          { en: 'complex password', zh: '複雜密碼' },
+          { en: 'victims', zh: '受害者' }
+        ]
+      }
+    ]
+  },
+  {
+    name: 'Level 2',
+    nameZH: '第二關',
+    time: 45,
+    questions: [
+      {
+        en: 'Why do people use easy passwords?',
+        zh: '為什麼人們使用簡單密碼？',
+        answer: 'I think people use easy passwords because they are easy to remember. For example, many people use "password" or "123456". So criminals can guess them quickly. This is why cyber crimes happen.',
+        answerZH: '我認為人們使用簡單密碼，因為它們容易記住。例如，很多人用「password」或「123456」。所以罪犯可以很快猜到它們。這就是為什麼會有網絡罪行。',
+        words: [
+          { en: 'easy to remember', zh: '容易記住' },
+          { en: 'guess', zh: '猜到' },
+          { en: 'quickly', zh: '快速地' },
+          { en: 'This is why', zh: '這就是為什麼' }
+        ]
+      },
+      {
+        en: 'What can happen if we do not protect ourselves?',
+        zh: '如果我們不保護自己，可能會發生什麼事？',
+        answer: 'If we do not protect ourselves, we can lose money or personal information. For example, criminals can steal our bank password and buy expensive things. So we may have financial loss. We may also have identity theft.',
+        answerZH: '如果我們不保護自己，我們可能損失金錢或個人資料。例如，罪犯可以偷我們的銀行密碼並買貴重的東西。所以我們可能會有金錢損失。我們也可能有身份盜竊。',
+        words: [
+          { en: 'personal information', zh: '個人資料' },
+          { en: 'steal', zh: '偷' },
+          { en: 'expensive things', zh: '貴重的東西' },
+          { en: 'identity theft', zh: '身份盜竊' }
+        ]
+      },
+      {
+        en: 'How can we make a complex password?',
+        zh: '我們如何設定複雜密碼？',
+        answer: 'We can make a complex password with letters, numbers, and symbols. For example, "BlueCat#2024" is a complex password. It is long and hard to guess. So criminals cannot easily break into our accounts.',
+        answerZH: '我們可以用字母、數字和符號來設定複雜密碼。例如，「BlueCat#2024」是一個複雜密碼。它很長，難以猜到。所以罪犯不能輕易入侵我們的帳戶。',
+        words: [
+          { en: 'letters', zh: '字母' },
+          { en: 'numbers', zh: '數字' },
+          { en: 'symbols', zh: '符號' },
+          { en: 'long', zh: '長' },
+          { en: 'hard to guess', zh: '難以猜到' },
+          { en: 'break into', zh: '入侵' }
+        ]
+      },
+      {
+        en: 'How can we teach our family about cyber safety?',
+        zh: '我們如何教家人網絡安全？',
+        answer: 'We can teach our family to use different passwords. For example, I can help my parents change their bank password. I can also tell them not to use public computers for banking. So they will be safer online.',
+        answerZH: '我們可以教家人使用不同的密碼。例如，我可以幫父母更改銀行密碼。我也可以叫他們不要用公共電腦做銀行業務。所以他們在網上會更安全。',
+        words: [
+          { en: 'parents', zh: '父母' },
+          { en: 'change', zh: '更改' },
+          { en: 'public computers', zh: '公共電腦' },
+          { en: 'banking', zh: '銀行業務' },
+          { en: 'safer online', zh: '在網上更安全' }
+        ]
+      }
+    ]
+  },
+  {
+    name: 'Level 3',
+    nameZH: '第三關',
+    time: 60,
+    questions: [
+      {
+        en: 'Explain two reasons why cyber crimes happen.',
+        zh: '解釋兩個網絡罪行發生的原因。',
+        answer: 'There are two reasons. First, people use easy passwords like "123456". Criminals can guess them quickly. Second, people use the same password for many accounts. If one account is hacked, all accounts are not safe. So criminals can steal money and information easily.',
+        answerZH: '有兩個原因。第一，人們使用像「123456」這樣的簡單密碼。罪犯可以很快猜到。第二，人們多個帳戶使用同一個密碼。如果一個帳戶被黑客入侵，所有帳戶都不安全。所以罪犯可以輕易偷錢和資料。',
+        words: [
+          { en: 'two reasons', zh: '兩個原因' },
+          { en: 'First / Second', zh: '第一 / 第二' },
+          { en: 'the same password', zh: '同一個密碼' },
+          { en: 'hacked', zh: '被黑客入侵' },
+          { en: 'steal', zh: '偷' }
+        ]
+      },
+      {
+        en: 'Why is protecting ourselves important for students?',
+        zh: '為什麼保護自己對學生很重要？',
+        answer: 'It is important for students because we use computers every day. For example, we use email and social media. If we do not protect ourselves, criminals can steal our personal information. They can also use our account to cheat our friends. So we must learn cyber safety.',
+        answerZH: '這對學生很重要，因為我們每天都用電腦。例如，我們用電郵和社交媒體。如果我們不保護自己，罪犯可以偷我們的個人資料。他們也可以用我們的帳戶欺騙我們的朋友。所以我們必須學習網絡安全。',
+        words: [
+          { en: 'students', zh: '學生' },
+          { en: 'every day', zh: '每天' },
+          { en: 'email', zh: '電子郵件' },
+          { en: 'social media', zh: '社交媒體' },
+          { en: 'cheat', zh: '欺騙' },
+          { en: 'must learn', zh: '必須學習' }
+        ]
+      },
+      {
+        en: 'What are two ways to protect ourselves from cyber crime?',
+        zh: '有哪兩個方法可以保護自己免受網絡罪行？',
+        answer: 'There are two ways. First, we should use complex passwords. For example, use letters, numbers, and symbols. Second, we should not use public computers for bank accounts. There may be a virus. So we should use our own computer or phone.',
+        answerZH: '有兩個方法。第一，我們應該使用複雜密碼。例如，用字母、數字和符號。第二，我們不應該用公共電腦登入銀行帳戶。可能會有病毒。所以我們應該用自己的電腦或手機。',
+        words: [
+          { en: 'two ways', zh: '兩個方法' },
+          { en: 'complex passwords', zh: '複雜密碼' },
+          { en: 'letters, numbers, and symbols', zh: '字母、數字和符號' },
+          { en: 'public computers', zh: '公共電腦' },
+          { en: 'virus', zh: '病毒' },
+          { en: 'our own', zh: '我們自己的' }
+        ]
+      },
+      {
+        en: 'What would you say to your grandparents about cyber safety?',
+        zh: '你會對祖父母說什麼關於網絡安全？',
+        answer: 'I would tell my grandparents to use different passwords. For example, they should not use "123456" for their bank account. I would also tell them not to click strange links. If they see a strange email, they should ask me. So they can be safe online.',
+        answerZH: '我會告訴祖父母使用不同的密碼。例如，他們不應該用「123456」作為銀行帳戶密碼。我還會告訴他們不要點擊奇怪的連結。如果他們看到奇怪的電郵，應該問我。所以他們在網上會安全。',
+        words: [
+          { en: 'grandparents', zh: '祖父母' },
+          { en: 'bank account', zh: '銀行帳戶' },
+          { en: 'strange links', zh: '奇怪的連結' },
+          { en: 'strange email', zh: '奇怪的電子郵件' },
+          { en: 'ask me', zh: '問我' },
+          { en: 'safe online', zh: '在網上安全' }
+        ]
+      }
+    ]
+  }
+];
+
+/* =========================================================
+   STATE
+   ========================================================= */
+const state = {
+  levelIndex: 0,
+  qIndex: 0,
+  scores: {},        // "level-q" -> 1..3
+  extra: false,
+  timerId: null,
+  endTime: 0,
+  totalTime: 0,
+  phase: 'ready',    // ready | running | revealed
+  rating: 0
+};
+
+const $ = id => document.getElementById(id);
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(function(s){
+    s.classList.remove('active');
+  });
+  $('screen-' + name).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function starString(v){
+  v = v || 0;
+  return '★'.repeat(v) + '☆'.repeat(3 - v);
+}
+
+function totalStars(){
+  let t = 0;
+  for (const k in state.scores) t += state.scores[k];
+  return t;
+}
+
+function beep(){
+  try{
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    const ctx = new Ctx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'square';
+    osc.frequency.value = 880;
+    gain.gain.value = 0.06;
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    setTimeout(function(){
+      try{ osc.stop(); ctx.close(); }catch(e){}
+    }, 350);
+  }catch(e){ /* silent */ }
+}
+
+/* =========================================================
+   GAME FLOW
+   ========================================================= */
+function startLevel(li){
+  state.levelIndex = li;
+  state.qIndex = 0;
+  showScreen('game');
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const level = LEVELS[state.levelIndex];
+  const q = level.questions[state.qIndex];
+
+  $('level-label').textContent = level.name + ' · ' + level.nameZH;
+  $('q-label').textContent = 'Question ' + (state.qIndex + 1) + ' of ' + level.questions.length;
+  $('star-label').textContent = '★ ' + totalStars();
+
+  $('q-zh').textContent = q.zh;
+  $('q-en').textContent = q.en;
+
+  state.totalTime = level.time + (state.extra ? 15 : 0);
+  $('q-time').textContent = state.totalTime;
+
+  stopTimer();
+  state.phase = 'ready';
+  state.rating = 0;
+
+  $('timer-fill').style.width = '100%';
+  $('timer-fill').classList.remove('warn');
+  $('timer-num').textContent = state.totalTime + 's';
+  $('timer-num').classList.remove('warn');
+
+  $('btn-start').hidden = false;
+  $('btn-reveal').hidden = true;
+  $('answer-area').hidden = true;
+  $('btn-next').hidden = true;
+
+  $('answer-zh').hidden = true;
+  $('btn-translate').textContent = '顯示中文翻譯 Show Chinese';
+
+  renderStars(0);
+
+  $('answer-en').textContent = q.answer;
+  $('answer-zh').textContent = q.answerZH;
+
+  const ul = $('words-list');
+  ul.innerHTML = '';
+  q.words.forEach(function(w){
+    const li = document.createElement('li');
+    const en = document.createElement('span');
+    en.className = 'w-en';
+    en.textContent = w.en;
+    const zh = document.createElement('span');
+    zh.className = 'w-zh';
+    zh.textContent = w.zh;
+    li.appendChild(en);
+    li.appendChild(zh);
+    ul.appendChild(li);
+  });
+}
+
+function startTimer(){
+  if (state.phase === 'running') return;
+  state.phase = 'running';
+  $('btn-start').hidden = true;
+  $('btn-reveal').hidden = false;
+  state.endTime = Date.now() + state.totalTime * 1000;
+  state.timerId = setInterval(tick, 100);
+  tick();
+}
+
+function tick(){
+  const left = Math.max(0, state.endTime - Date.now());
+  const pct = (left / (state.totalTime * 1000)) * 100;
+  $('timer-fill').style.width = pct + '%';
+
+  const secs = Math.ceil(left / 1000);
+  $('timer-num').textContent = secs + 's';
+
+  if (secs <= 5){
+    $('timer-num').classList.add('warn');
+    $('timer-fill').classList.add('warn');
+  }
+
+  if (left <= 0){
+    stopTimer();
+    beep();
+    revealAnswer();
+  }
+}
+
+function stopTimer(){
+  if (state.timerId){
+    clearInterval(state.timerId);
+    state.timerId = null;
+  }
+}
+
+function revealAnswer(){
+  if (state.phase === 'revealed') return;
+  stopTimer();
+  state.phase = 'revealed';
+  $('btn-start').hidden = true;
+  $('btn-reveal').hidden = true;
+  $('timer-num').classList.remove('warn');
+  $('answer-area').hidden = false;
+  const area = $('answer-area');
+  if (area.scrollIntoView) area.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderStars(v){
+  const btns = document.querySelectorAll('.star-btn');
+  btns.forEach(function(b, i){
+    const on = i < v;
+    b.textContent = on ? '★' : '☆';
+    b.classList.toggle('on', on);
+  });
+}
+
+function rate(v){
+  if (state.phase !== 'revealed') return;
+  state.rating = v;
+  renderStars(v);
+  state.scores[state.levelIndex + '-' + state.qIndex] = v;
+  $('star-label').textContent = '★ ' + totalStars();
+
+  const level = LEVELS[state.levelIndex];
+  const isLast = state.qIndex >= level.questions.length - 1;
+  const btn = $('btn-next');
+  btn.textContent = isLast ? 'Finish Level 完成這一關 →' : 'Next 下一題 →';
+  btn.hidden = false;
+}
+
+function nextQuestion(){
+  const level = LEVELS[state.levelIndex];
+  if (state.qIndex < level.questions.length - 1){
+    state.qIndex += 1;
+    renderQuestion();
+    window.scrollTo(0, 0);
+  } else {
+    showEnd();
+  }
+}
+
+function messageFor(score){
+  if (score >= 30) return 'Excellent! 太棒了！ You are ready for the DSE speaking exam. 你已經準備好應付說話考試了。';
+  if (score >= 20) return 'Good job! 做得好！ Keep practising the pattern: because → for example → so. 繼續練習句式：because → for example → so。';
+  if (score >= 10) return 'Nice start! 好的開始！ Try to add one more detail next time. 下次試試加多一個細節。';
+  return 'Keep going! 繼續努力！ Read the sample answers aloud, then try again. 先大聲讀出參考答案，然後再試一次。';
+}
+
+function showEnd(){
+  stopTimer();
+
+  const tbody = $('score-body');
+  tbody.innerHTML = '';
+
+  let grand = 0;
+
+  LEVELS.forEach(function(lv, li){
+    const tr = document.createElement('tr');
+
+    const nameCell = document.createElement('td');
+    nameCell.innerHTML = lv.name + '<br><span class="small">' + lv.nameZH + '</span>';
+    tr.appendChild(nameCell);
+
+    let rowTotal = 0;
+
+    lv.questions.forEach(function(q, qi){
+      const v = state.scores[li + '-' + qi] || 0;
+      rowTotal += v;
+      const td = document.createElement('td');
+      td.textContent = starString(v);
+      tr.appendChild(td);
+    });
+
+    grand += rowTotal;
+
+    const totalCell = document.createElement('td');
+    const strong = document.createElement('strong');
+    strong.textContent = rowTotal;
+    totalCell.appendChild(strong);
+    totalCell.appendChild(document.createTextNode('/12'));
+    tr.appendChild(totalCell);
+
+    tbody.appendChild(tr);
+  });
+
+  $('grand-total').textContent = grand + ' / 36 ★';
+  $('end-message').textContent = messageFor(grand);
+
+  const nextBtn = $('btn-next-level');
+  if (state.levelIndex < LEVELS.length - 1){
+    nextBtn.hidden = false;
+    nextBtn.textContent = 'Next Level 下一關 (' + LEVELS[state.levelIndex + 1].name + ') →';
+  } else {
+    nextBtn.hidden = true;
+  }
+
+  showScreen('end');
+}
+
+/* =========================================================
+   EVENT LISTENERS
+   ========================================================= */
+document.querySelectorAll('.level-btn').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    startLevel(parseInt(btn.dataset.level, 10));
+  });
+});
+
+$('extra-time').addEventListener('change', function(e){
+  state.extra = e.target.checked;
+});
+
+$('btn-start').addEventListener('click', startTimer);
+
+$('btn-reveal').addEventListener('click', function(){
+  stopTimer();
+  revealAnswer();
+});
+
+$('btn-translate').addEventListener('click', function(){
+  const zh = $('answer-zh');
+  zh.hidden = !zh.hidden;
+  $('btn-translate').textContent = zh.hidden
+    ? '顯示中文翻譯 Show Chinese'
+    : '隱藏中文翻譯 Hide Chinese';
+});
+
+document.querySelectorAll('.star-btn').forEach(function(b){
+  b.addEventListener('click', function(){
+    rate(parseInt(b.dataset.v, 10));
+  });
+});
+
+$('btn-next').addEventListener('click', nextQuestion);
+
+$('btn-menu').addEventListener('click', function(){
+  stopTimer();
+  showScreen('start');
+});
+
+$('btn-menu-end').addEventListener('click', function(){
+  showScreen('start');
+});
+
+$('btn-next-level').addEventListener('click', function(){
+  if (state.levelIndex < LEVELS.length - 1){
+    startLevel(state.levelIndex + 1);
+  }
+});
+
+$('btn-again').addEventListener('click', function(){
+  state.scores = {};
+  state.levelIndex = 0;
+  state.qIndex = 0;
+  showScreen('start');
+});
+</script>
+</body>
+</html>
